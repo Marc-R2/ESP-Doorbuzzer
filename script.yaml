@@ -10,7 +10,7 @@ logger:
 api:
 
 ota:
-  password: "1a5deb66ea7f07a4132e279cbef78846"
+  password: !secret ota_password_door
 
 wifi:
   ssid: !secret wifi_ssid
@@ -18,8 +18,8 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Esphome-Web-D20E68"
-    password: "MW4cbEgw2Fzi"
+    ssid: !secret hotspot_ssid_door
+    password: !secret hotspot_password_door
 
 captive_portal:
 
