@@ -1,10 +1,7 @@
 esphome:
   name: "esp32-door"
-
-esp32:
+  platform: ESP32
   board: esp32dev
-  framework:
-    type: arduino
 
 # Enable logging
 logger:
@@ -39,17 +36,51 @@ switch:
     id: door_opener_switch
     icon: "mdi:lock-open-outline"
 
+# Define variables for button state and timer
+globals:
+  - id: door_button_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+  - id: buzzer_duration
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
+  - id: wait_duration
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
+number:
+  - platform: template
+    name: buzzer_duration
+    id: buzzer_duration_input
+    min_value: 1
+    max_value: 10
+    step: 1
+    set_action:
+      - lambda: |-
+          id(buzzer_duration) = x;
+  - platform: template
+    name: wait_duration
+    id: wait_duration_input
+    min_value: 1
+    max_value: 60
+    step: 1
+    set_action:
+      - lambda: |-
+          id(wait_duration) = x;
+
 button:
   - platform: template
     name: "Door Buzzer"
     on_press:
       - switch.turn_on: door_opener_switch
-      - delay: 500ms
+      - delay: !lambda 'return id(buzzer_duration_input).state;'
       - switch.turn_off: door_opener_switch
-      - delay: 2s
+      - delay: !lambda 'return id(wait_duration_input).state;'
       - switch.turn_on: door_opener_switch
-      - delay: 500ms
+      - delay: !lambda 'return id(buzzer_duration_input).state;'
       - switch.turn_off: door_opener_switch
-
-status_led:
-  pin: GPIO9
