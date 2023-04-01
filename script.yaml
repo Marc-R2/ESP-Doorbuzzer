@@ -39,5 +39,17 @@ switch:
     id: door_opener_switch
     icon: "mdi:lock-open-outline"
 
+button:
+  - platform: template
+    name: "Door Buzzer"
+    on_press:
+      - switch.turn_on: door_opener_switch
+      - delay: 500ms
+      - switch.turn_off: door_opener_switch
+      - delay: 2s
+      - switch.turn_on: door_opener_switch
+      - delay: 500ms
+      - switch.turn_off: door_opener_switch
+
 status_led:
   pin: GPIO9
