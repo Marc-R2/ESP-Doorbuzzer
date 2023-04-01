@@ -1,65 +1,43 @@
 esphome:
-  name: eps32-homenode-002
-  platform: ESP32
+  name: "esp32-door"
+
+esp32:
   board: esp32dev
+  framework:
+    type: arduino
 
-# Enable the server component
-server:
+# Enable logging
+logger:
 
-# Define a route for the OTA update endpoint
+# Enable Home Assistant API
 api:
-  - route:
-      update_ota:
-        post: update_ota
 
-# Define a password for the API endpoints
-api_password:
-  password: !secret ota_password
+ota:
+  password: "1a5deb66ea7f07a4132e279cbef78846"
 
-# Define a rule to update the device when a POST request is received at the "/update_ota" path
-sensor:
-  - platform: request
-    name: "OTA Update Request"
-    request_method: POST
-    resource: "/update_ota"
-    on_request:
-      # Validate the password
-      if: "{{ (request.data.password == ota_password) }}"
-      then:
-        # Download the specified version of the ESP-Home script from GitHub
-        - update.download:
-            url: >-
-              {% if request.data.tag %}
-              https://raw.githubusercontent.com/Marc-R2/ESP-Doorbuzzer/tags/{{ request.data.tag }}/script.yaml
-              {% else %}
-              https://raw.githubusercontent.com/Marc-R2/ESP-Doorbuzzer/{{ request.data.branch | default('master') }}/script.yaml
-              {% endif %}
-            headers:
-              User-Agent: "ESP-Home"
-        # Restart the device to apply the update
-        - system.restart
-      else:
-        # Return an error message if the password is incorrect
-        - template.return_json:
-            error: "Incorrect password"
-  - platform: wifi_signal
-    name: "Wifi Signal Strength"
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
-binary_sensor:
-  - platform: gpio
-    pin: D5
-    name: "Doorbell Button"
-    on_press:
-      - switch.turn_on: doorbell_buzzer
-  - platform: status
-    name: "Doorbell Online"
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-D20E68"
+    password: "MW4cbEgw2Fzi"
+
+captive_portal:
+
+web_server:
+  port: 80
+  auth:
+    username: admin
+    password: admin
 
 switch:
   - platform: gpio
-    pin: D6
-    name: doorbell_buzzer
+    pin: GPIO12
+    name: door_opener
+    id: door_opener_switch
+    icon: "mdi:lock-open-outline"
 
 status_led:
-  pin: D7
-
-logger:
+  pin: GPIO9
