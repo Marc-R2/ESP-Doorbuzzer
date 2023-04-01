@@ -16,7 +16,7 @@ jobs:
       - name: Build firmware
         uses: esphome/build-action@v1
         with:
-          yaml_file: my_configuration.yaml
+          yaml_file: script.yaml
 
       - name: Create Release
         uses: actions/create-release@v1
