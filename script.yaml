@@ -64,14 +64,25 @@ number:
 button:
   - platform: template
     name: "Door Buzzer"
+    id: door_buzzer_button
     on_press:
-      - switch.turn_on: door_opener_switch
-      - delay: !lambda 'return id(buzzer_duration_input).state * 1000;'
-      - switch.turn_off: door_opener_switch
-      - delay: !lambda 'return id(wait_duration_input).state * 1000;'
-      - switch.turn_on: door_opener_switch
-      - delay: !lambda 'return id(buzzer_duration_input).state * 1000;'
-      - switch.turn_off: door_opener_switch
+      - if:
+          condition:
+            switch.is_on: my_led
+          then:
+            - logger.log: "LED is already on, skipping"
+          else:
+            - logger.log: "LED is off, turning on"
+            - switch.turn_on: my_led
+            - switch.turn_on: door_opener_switch
+            - delay: !lambda 'return id(buzzer_duration_input).state * 1000;'
+            - switch.turn_off: door_opener_switch
+            - delay: !lambda 'return id(wait_duration_input).state * 1000;'
+            - switch.turn_on: door_opener_switch
+            - delay: !lambda 'return id(buzzer_duration_input).state * 1000;'
+            - switch.turn_off: door_opener_switch
+            - delay: 500ms
+            - switch.turn_off: my_led
 
 # Define the button input
 binary_sensor:
@@ -83,14 +94,6 @@ binary_sensor:
     name: "My Button"
     on_press:
       then:
-        # if the led is on, skip the rest of the actions
-        - if:
-            condition:
-              switch.is_on: my_led
-            then:
-              - logger.log: "LED is already on, skipping"
-            else:
-              - logger.log: "LED is off, turning on"
-              - switch.turn_on: my_led
-              - delay: 5000ms
-              - switch.turn_off: my_led
+        # trigger door_buzzer_button
+        - logger.log: "Button pressed, triggering door buzzer"
+        - button.press: door_buzzer_button
