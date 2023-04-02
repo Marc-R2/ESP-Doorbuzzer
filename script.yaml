@@ -74,20 +74,23 @@ button:
       - switch.turn_off: door_opener_switch
 
 # Define the button input
-# Define the button input
 binary_sensor:
   - platform: gpio
     pin:
-      number: GPIO0
+      number: GPIO27
       mode: INPUT_PULLUP
       inverted: True
     name: "My Button"
     on_press:
       then:
-        - switch.turn_on: my_led
-        - lambda: |-
-            id(my_button).enabled = false;
-            delay(5000);
-            id(my_button).enabled = true;
-        - switch.turn_off: my_led
-    id: my_button
+        # if the led is on, skip the rest of the actions
+        - if:
+            condition:
+              switch.is_on: my_led
+            then:
+              - logger.log: "LED is already on, skipping"
+            else:
+              - logger.log: "LED is off, turning on"
+              - switch.turn_on: my_led
+              - delay: 5000ms
+              - switch.turn_off: my_led
