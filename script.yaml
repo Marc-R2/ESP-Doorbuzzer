@@ -35,6 +35,9 @@ switch:
     name: door_opener
     id: door_opener_switch
     icon: "mdi:lock-open-outline"
+  - platform: gpio
+    pin: GPIO14
+    id: my_led
 
 number:
   - platform: template
@@ -69,3 +72,22 @@ button:
       - switch.turn_on: door_opener_switch
       - delay: !lambda 'return id(buzzer_duration_input).state * 1000;'
       - switch.turn_off: door_opener_switch
+
+# Define the button input
+# Define the button input
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "My Button"
+    on_press:
+      then:
+        - switch.turn_on: my_led
+        - lambda: |-
+            id(my_button).enabled = false;
+            delay(5000);
+            id(my_button).enabled = true;
+        - switch.turn_off: my_led
+    id: my_button
